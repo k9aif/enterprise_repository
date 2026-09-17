@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K9X Enterprise Repository</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div style="font-size:13px;font-weight:700;color:var(--text-header);margin-bottom:2px">
+        <a href="#/" class="header-logo" style="font-size:15px">K9X</a> Enterprise Repository
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Architecture Repository</div>
+
+      <h3>Browse</h3>
+      <ul id="nav-frameworks"><li class="muted">loading…</li></ul>
+      <h3>Artifact Types</h3>
+      <ul id="nav-artifact-types"><li class="muted">loading…</li></ul>
+      <h3>More</h3>
+      <ul>
+        <li><a href="#/standards">All Standards</a></li>
+        <li><a href="#/">Home</a></li>
+      </ul>
+    </aside>
+
+    <div class="main">
+      <header class="header">
+        <div class="header-brand">
+          <a class="header-logo" href="#/">K9X</a>
+          <div class="header-sub">Enterprise Repository</div>
+        </div>
+        <form class="site-search" id="site-search">
+          <input type="text" id="q" placeholder="Search artifacts, standards, patterns…" autocomplete="off">
+          <button type="submit">Search</button>
+        </form>
+        <div class="header-actions">
+          <a id="continuum-link" class="btn btn-ghost" href="#" target="_blank" style="padding:6px 12px;font-size:12px">Open Continuum ↗</a>
+          <button id="theme-btn" class="theme-toggle" title="Toggle theme">🌙</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <main id="app">Loading…</main>
+      </div>
+
+      <footer class="site-footer">
+        K9X Enterprise Repository — the Architecture Repository behind
+        <a id="continuum-footer-link" href="#" target="_blank">K9X Continuum</a>'s Enterprise Continuum catalog.
+      </footer>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

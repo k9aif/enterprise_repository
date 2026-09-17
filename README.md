@@ -1,7 +1,7 @@
 # k9x Enterprise Repository
 
 The TOGAF **Architecture Repository** counterpart to
-[k9x_continuum](../k9x_continuum) (which implements the Enterprise
+[k9x_continuum](https://github.com/k9aif/continuum) (which implements the Enterprise
 **Continuum** — the classification/governance lens). This service is the
 actual store: artifact content, the Standards Information Base, and a real
 Governance Log (compliance assessments, dispensations), searchable and
@@ -90,11 +90,18 @@ PATCH  /api/v1/dispensations/{id}/revoke     — requires X-API-Key
 - Write auth is a single shared API key, not per-user. Fine for an MVP
   behind a trusted network; not sufficient once this is enterprise-facing.
 
-See `../k9x_continuum/togaf_gap_analysis_and_enhancement_plan.md` for the
-full gap analysis and phased plan this service implements Part 6 of.
+See `togaf_gap_analysis_and_enhancement_plan.md` in the
+[k9x_continuum](https://github.com/k9aif/continuum) repo for the full gap
+analysis and phased plan this service implements Part 6 of.
+
+## Part of the K9X ecosystem
+
+Sibling project to [k9x_continuum](https://github.com/k9aif/continuum) (the
+Enterprise Continuum classification/governance layer this service stores
+artifacts for) and [k9x_studio](https://github.com/k9aif/studiox) (a
+consumer of the same ABB/SBB catalog). Built on
+[K9-AIF](https://github.com/k9aif/k9-aif-framework).
 
 ## License
 
-Apache License 2.0 — see [LICENSE](../k9x_continuum/LICENSE) for the
-project-wide license text (same license, sibling ecosystem project).
-# enterprise_repository
+Apache License 2.0 — see [LICENSE](LICENSE).
