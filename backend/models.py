@@ -14,12 +14,12 @@ class Artifact(Base):
     __tablename__ = "artifacts"
     __table_args__ = (
         CheckConstraint("content_text IS NOT NULL OR content_bytes IS NOT NULL", name="artifacts_content_check"),
-        CheckConstraint("entity_type IN ('sbb','abb')", name="artifacts_entity_type_check"),
+        CheckConstraint("entity_type IN ('sbb','abb','application')", name="artifacts_entity_type_check"),
         {"schema": _SCHEMA},
     )
 
     id            = Column(Integer, primary_key=True, index=True)
-    entity_type   = Column(String(10), nullable=False)
+    entity_type   = Column(String(20), nullable=False)
     entity_id     = Column(Integer, nullable=False)
     entity_name   = Column(String(255), nullable=False)
     artifact_type = Column(String(50), nullable=False)
@@ -32,6 +32,7 @@ class Artifact(Base):
     version       = Column(String(20), default="1.0.0")
     git_ref       = Column(String(500))
     captured_by   = Column(String(255))
+    business_unit = Column(String(255))
     created_at    = Column(DateTime, server_default="now()")
 
 
@@ -53,7 +54,7 @@ class EntityStandard(Base):
     __tablename__ = "entity_standards"
     __table_args__ = {"schema": _SCHEMA}
 
-    entity_type = Column(String(10), primary_key=True)
+    entity_type = Column(String(20), primary_key=True)
     entity_id   = Column(Integer, primary_key=True)
     entity_name = Column(String(255), nullable=False)
     standard_id = Column(Integer, ForeignKey(f"{_SCHEMA}.standards.id", ondelete="CASCADE"), primary_key=True)
@@ -64,7 +65,7 @@ class ComplianceAssessment(Base):
     __table_args__ = {"schema": _SCHEMA}
 
     id          = Column(Integer, primary_key=True, index=True)
-    entity_type = Column(String(10), nullable=False)
+    entity_type = Column(String(20), nullable=False)
     entity_id   = Column(Integer, nullable=False)
     entity_name = Column(String(255), nullable=False)
     criteria    = Column(Text, nullable=False)
@@ -79,7 +80,7 @@ class Dispensation(Base):
     __table_args__ = {"schema": _SCHEMA}
 
     id          = Column(Integer, primary_key=True, index=True)
-    entity_type = Column(String(10), nullable=False)
+    entity_type = Column(String(20), nullable=False)
     entity_id   = Column(Integer, nullable=False)
     entity_name = Column(String(255), nullable=False)
     standard_id = Column(Integer, ForeignKey(f"{_SCHEMA}.standards.id"))
@@ -103,6 +104,7 @@ class ArtifactCreate(BaseModel):
     version: str = "1.0.0"
     git_ref: Optional[str] = None
     captured_by: Optional[str] = None
+    business_unit: Optional[str] = None
 
 
 class ArtifactOut(BaseModel):
@@ -119,6 +121,7 @@ class ArtifactOut(BaseModel):
     version: str
     git_ref: Optional[str]
     captured_by: Optional[str]
+    business_unit: Optional[str]
     created_at: Optional[datetime]
 
     model_config = {"from_attributes": True}
@@ -132,6 +135,7 @@ class ArtifactListItem(BaseModel):
     artifact_type: str
     filename: str
     version: str
+    business_unit: Optional[str]
     created_at: Optional[datetime]
 
     model_config = {"from_attributes": True}

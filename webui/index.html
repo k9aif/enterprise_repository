@@ -7,29 +7,26 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-  <div class="layout">
+  <div class="layout" id="layout">
     <aside class="sidebar">
       <div style="font-size:13px;font-weight:700;color:var(--text-header);margin-bottom:2px">
-        <a href="#/" class="header-logo" style="font-size:15px">K9X</a> Enterprise Repository
+        <a href="https://k9x.ai" target="_blank" rel="noopener" class="header-logo" style="font-size:15px">K9X</a> Enterprise Repository <span class="beta-badge">Beta</span>
       </div>
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Architecture Repository</div>
 
-      <h3>Browse</h3>
-      <ul id="nav-frameworks"><li class="muted">loading…</li></ul>
+      <a href="#/" class="sidebar-home-link">← Home</a>
+
+      <a href="#/browse" class="btn btn-primary" style="display:block;text-align:center;margin-bottom:16px">Browse</a>
+
       <h3>Artifact Types</h3>
       <ul id="nav-artifact-types"><li class="muted">loading…</li></ul>
-      <h3>More</h3>
-      <ul>
-        <li><a href="#/standards">All Standards</a></li>
-        <li><a href="#/">Home</a></li>
-      </ul>
     </aside>
 
     <div class="main">
       <header class="header">
         <div class="header-brand">
-          <a class="header-logo" href="#/">K9X</a>
-          <div class="header-sub">Enterprise Repository</div>
+          <a class="header-logo" href="https://k9x.ai" target="_blank" rel="noopener">K9X</a>
+          <div class="header-sub">Enterprise Repository <span class="beta-badge">Beta</span></div>
         </div>
         <form class="site-search" id="site-search">
           <input type="text" id="q" placeholder="Search artifacts, standards, patterns…" autocomplete="off">

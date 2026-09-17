@@ -16,6 +16,7 @@ def get_entity_article(entity_type: str, entity_id: int, db: Session = Depends(g
                    .order_by(Artifact.created_at.desc())
                    .all())
     entity_name = artifacts[0].entity_name if artifacts else None
+    business_unit = next((a.business_unit for a in artifacts if a.business_unit), None)
 
     standards = (db.query(Standard)
                    .join(EntityStandard, EntityStandard.standard_id == Standard.id)
@@ -53,9 +54,11 @@ def get_entity_article(entity_type: str, entity_id: int, db: Session = Depends(g
         "entity_type": entity_type,
         "entity_id": entity_id,
         "entity_name": entity_name,
+        "business_unit": business_unit,
         "artifacts": [
             {"id": a.id, "artifact_type": a.artifact_type, "filename": a.filename, "version": a.version,
-             "content_hash": a.content_hash, "size_bytes": a.size_bytes, "created_at": a.created_at}
+             "content_hash": a.content_hash, "size_bytes": a.size_bytes, "created_at": a.created_at,
+             "git_ref": a.git_ref, "captured_by": a.captured_by}
             for a in artifacts
         ],
         "standards": [{"id": s.id, "name": s.name, "framework": s.framework, "mandatory": s.mandatory} for s in standards],

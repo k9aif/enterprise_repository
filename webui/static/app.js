@@ -53,10 +53,6 @@ function updateThemeIcon() {
 async function loadSidebar() {
   try {
     const cats = await api("/api/v1/search/categories");
-    document.getElementById("nav-frameworks").innerHTML =
-      cats.frameworks.length
-        ? cats.frameworks.map(f => `<li><a href="#/standards?framework=${encodeURIComponent(f)}">${esc(f)}</a></li>`).join("")
-        : `<li class="muted">none yet</li>`;
     document.getElementById("nav-artifact-types").innerHTML =
       cats.artifact_types.length
         ? cats.artifact_types.map(t => `<li><a href="#/search?artifact_type=${encodeURIComponent(t)}">${esc(t)}</a></li>`).join("")
@@ -108,7 +104,7 @@ function pageHome() {
         Repository structure.
       </p>
       <div class="landing-cta-row">
-        <button class="btn btn-primary" onclick="location.hash='#/search'">Explore the Repository</button>
+        <button class="btn btn-primary" onclick="location.hash='#/browse'">Explore the Repository</button>
         <button class="btn btn-ghost" onclick="document.getElementById('learn-section').scrollIntoView({behavior:'smooth'})">How this works</button>
       </div>
     </div>
@@ -167,21 +163,106 @@ function pageHome() {
 
 // ── Search / entity / standards pages ───────────────────────────────────
 
+// ── Browse: Organizational Units -> Business Units -> Artifacts ────────────
+// Only one real organization exists today, no Organization table yet (Phase
+// E of the plan). Named here as a single fixed entry, not fabricated as
+// multiple orgs that don't exist.
+const ORGANIZATIONS = [{ id: "k9x", name: "K9X" }];
+
+function breadcrumb(parts) {
+  return `<div class="breadcrumb">${parts.map((p, i) =>
+    i < parts.length - 1
+      ? `<a href="${p.href}">${esc(p.label)}</a><span class="breadcrumb-sep">/</span>`
+      : `<span>${esc(p.label)}</span>`
+  ).join("")}</div>`;
+}
+
+async function pageBrowse() {
+  // Table, not tiles or a pie chart: org header, business units listed with
+  // a real distinct-artifact count each, no separate "pick an org" click
+  // since only one org exists today.
+  app.innerHTML = `<p class="muted">Loading…</p>`;
+  try {
+    const data = await api("/api/v1/search/dashboard");
+    const org = ORGANIZATIONS[0];
+    const totalArtifacts = data.business_units.reduce((sum, b) => sum + b.count, 0);
+    const rows = data.business_units.length
+      ? `<table class="listing">
+          <tr><th>Business Unit</th><th>Artifacts</th><th></th></tr>
+          ${data.business_units.map(b => `
+            <tr>
+              <td><a href="#/browse/org/${esc(org.id)}/bu/${encodeURIComponent(b.name)}">${esc(b.name)}</a></td>
+              <td>${esc(b.count)}</td>
+              <td><a href="#/browse/org/${esc(org.id)}/bu/${encodeURIComponent(b.name)}">View →</a></td>
+            </tr>`).join("")}
+        </table>`
+      : `<p class="muted">No business units yet.</p>`;
+
+    app.innerHTML = `
+      ${breadcrumb([{ label: "Home", href: "#/" }, { label: "Organizational Units" }])}
+      <h1>Organizational Units</h1>
+      <p class="muted">Only one organization exists today. A real multi-level Organization and
+      Business Unit hierarchy is still planned (Phase E), this view is backfilled from
+      Continuum's existing application domain data, not a fabricated structure.</p>
+      <h2 style="margin:20px 0 4px;font-size:16px">${esc(org.name)}</h2>
+      <p class="muted" style="margin-bottom:8px">${esc(data.business_units.length)} business units · ${esc(totalArtifacts)} artifacts total</p>
+      ${rows}
+    `;
+  } catch (e) {
+    app.innerHTML = `<p class="muted">Failed to load: ${esc(e.message)}</p>`;
+  }
+}
+
+async function pageBrowseArtifacts(orgId, businessUnit) {
+  const org = ORGANIZATIONS.find(o => o.id === orgId);
+  const orgName = org ? org.name : orgId;
+  app.innerHTML = `<p class="muted">Loading…</p>`;
+  try {
+    const data = await api(`/api/v1/search?q=&business_unit=${encodeURIComponent(businessUnit)}`);
+    const rows = data.entities.length
+      ? `<table class="listing">
+          <tr><th>Name</th><th>Type</th><th>Artifacts</th><th></th></tr>
+          ${data.entities.map(e => `
+            <tr>
+              <td><a href="#/entity/${esc(e.entity_type)}/${esc(e.entity_id)}">${esc(e.entity_name)}</a></td>
+              <td>${esc(e.entity_type.toUpperCase())}</td>
+              <td>${esc(e.artifact_count)} (${esc(e.artifact_type)})</td>
+              <td><a href="#/entity/${esc(e.entity_type)}/${esc(e.entity_id)}">View →</a></td>
+            </tr>`).join("")}
+        </table>`
+      : `<p class="muted">No artifacts in this business unit yet.</p>`;
+
+    app.innerHTML = `
+      ${breadcrumb([
+        { label: "Home", href: "#/" },
+        { label: "Organizational Units", href: "#/browse" },
+        { label: businessUnit },
+      ])}
+      <h1>${esc(orgName)} / ${esc(businessUnit)}</h1>
+      ${rows}
+    `;
+  } catch (e) {
+    app.innerHTML = `<p class="muted">Failed to load: ${esc(e.message)}</p>`;
+  }
+}
+
 async function pageSearch(params) {
   const q = params.get("q") || "";
   const artifact_type = params.get("artifact_type") || "";
+  const business_unit = params.get("business_unit") || "";
   app.innerHTML = `<h1>Search</h1><p class="muted">Searching…</p>`;
   try {
     const url = new URL("/api/v1/search", location.origin);
     url.searchParams.set("q", q);
     if (artifact_type) url.searchParams.set("artifact_type", artifact_type);
+    if (business_unit) url.searchParams.set("business_unit", business_unit);
     const data = await api(url.pathname + url.search);
 
     const entityCards = data.entities.map(e => `
       <div class="entity-card" onclick="location.hash='#/entity/${esc(e.entity_type)}/${esc(e.entity_id)}'">
         <div class="entity-card-type">${esc(e.entity_type.toUpperCase())} · ${esc(e.artifact_count)} artifact(s)</div>
         <div class="entity-card-name">${esc(e.entity_name)}</div>
-        <div class="entity-card-meta">${esc(e.artifact_type)}</div>
+        <div class="entity-card-meta">${esc(e.artifact_type)}${e.business_unit ? ` · ${esc(e.business_unit)}` : ""}</div>
       </div>`).join("") || `<p class="muted">No matching artifacts.</p>`;
 
     const standardCards = data.standards.map(s => `
@@ -191,8 +272,11 @@ async function pageSearch(params) {
         <div class="entity-card-meta">${esc(s.description || "")}</div>
       </div>`).join("") || `<p class="muted">No matching standards.</p>`;
 
+    const titleParts = [];
+    if (q) titleParts.push(`"${esc(q)}"`);
+    if (business_unit) titleParts.push(esc(business_unit));
     app.innerHTML = `
-      <h1>Search results${q ? `: "${esc(q)}"` : ""}</h1>
+      <h1>Search results${titleParts.length ? `: ${titleParts.join(" · ")}` : ""}</h1>
       <h3 style="margin:20px 0 10px;font-size:12px;text-transform:uppercase;color:var(--text-muted)">Artifacts / Entities</h3>
       <div class="card-grid">${entityCards}</div>
       <h3 style="margin:20px 0 10px;font-size:12px;text-transform:uppercase;color:var(--text-muted)">Standards</h3>
@@ -215,6 +299,7 @@ async function pageEntity(entityType, entityId) {
         <dl>
           <dt>Type</dt><dd>${esc(entityType.toUpperCase())}</dd>
           <dt>ID</dt><dd>${esc(entityId)}</dd>
+          ${data.business_unit ? `<dt>Business Unit</dt><dd>${esc(data.business_unit)}</dd>` : ""}
           <dt>Artifacts</dt><dd>${data.artifacts.length}</dd>
           <dt>Standards satisfied</dt><dd>${data.standards.length}</dd>
           <dt>Active dispensations</dt><dd>${data.dispensations.filter(d => d.status === "active").length}</dd>
@@ -222,14 +307,22 @@ async function pageEntity(entityType, entityId) {
       </div>`;
 
     const artifactBlocks = data.artifacts.length
-      ? data.artifacts.map(a => `
+      ? data.artifacts.map(a => {
+          const gitRefHtml = a.git_ref
+            ? (/^https?:\/\//.test(a.git_ref)
+                ? `<a href="${esc(a.git_ref)}" target="_blank" rel="noopener">${esc(a.git_ref)} ↗</a>`
+                : `<code>${esc(a.git_ref)}</code>`)
+            : `<span class="muted">no source link captured</span>`;
+          return `
         <div class="artifact-block">
           <div class="artifact-block-header">
             <span><strong>${esc(a.filename)}</strong> · ${esc(a.artifact_type)} · v${esc(a.version)}</span>
             <span class="muted">${fmtDate(a.created_at)} · sha256:${esc((a.content_hash || "").slice(0, 12))}…</span>
           </div>
+          <div class="artifact-block-source">Source: ${gitRefHtml}${a.captured_by ? ` · captured by ${esc(a.captured_by)}` : ""}</div>
           <pre id="artifact-content-${a.id}">loading…</pre>
-        </div>`).join("")
+        </div>`;
+        }).join("")
       : `<p class="muted">No artifacts captured for this entity yet.</p>`;
 
     const assessmentRows = data.compliance_assessments.length
@@ -330,11 +423,17 @@ function route() {
   const params = new URLSearchParams(queryPart || "");
   const segments = pathPart.split("/").filter(Boolean);
 
+  const isLanding = segments.length === 0;
+  document.getElementById("layout").classList.toggle("landing", isLanding);
+
   if (segments.length === 0) return pageHome();
   if (segments[0] === "search") return pageSearch(params);
   if (segments[0] === "entity" && segments.length === 3) return pageEntity(segments[1], segments[2]);
   if (segments[0] === "standards" && segments.length === 1) return pageStandards(params);
   if (segments[0] === "standards" && segments.length === 2) return pageStandardDetail(segments[1]);
+  if (segments[0] === "browse" && segments.length === 1) return pageBrowse();
+  if (segments[0] === "browse" && segments[1] === "org" && segments[3] === "bu" && segments.length === 5)
+    return pageBrowseArtifacts(segments[2], decodeURIComponent(segments[4]));
   app.innerHTML = `<p class="muted">Not found.</p>`;
 }
 

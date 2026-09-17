@@ -15,6 +15,7 @@ def list_artifacts(
     entity_type: Optional[str] = None,
     entity_id: Optional[int] = None,
     artifact_type: Optional[str] = None,
+    business_unit: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     q = db.query(Artifact)
@@ -24,6 +25,8 @@ def list_artifacts(
         q = q.filter(Artifact.entity_id == entity_id)
     if artifact_type:
         q = q.filter(Artifact.artifact_type == artifact_type)
+    if business_unit:
+        q = q.filter(Artifact.business_unit == business_unit)
     return q.order_by(Artifact.created_at.desc()).all()
 
 

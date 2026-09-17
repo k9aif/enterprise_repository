@@ -21,7 +21,7 @@ SET search_path TO enterprise_repository;
 
 CREATE TABLE IF NOT EXISTS enterprise_repository.artifacts (
     id              SERIAL          PRIMARY KEY,
-    entity_type     VARCHAR(10)     NOT NULL,   -- 'sbb' | 'abb'
+    entity_type     VARCHAR(20)     NOT NULL,   -- 'sbb' | 'abb' | 'application'
     entity_id       INTEGER         NOT NULL,   -- k9x_continuum.k9repo.{sbbs,abbs}.id
     entity_name     VARCHAR(255)    NOT NULL,   -- denormalized for display w/o cross-service call
     artifact_type   VARCHAR(50)     NOT NULL,
@@ -36,16 +36,19 @@ CREATE TABLE IF NOT EXISTS enterprise_repository.artifacts (
     version         VARCHAR(20)     NOT NULL DEFAULT '1.0.0',
     git_ref         VARCHAR(500),
     captured_by     VARCHAR(255),
+    business_unit   VARCHAR(255),   -- interim: backfilled from k9x_continuum's Application.department
+                                     -- until the real Organization/BusinessUnit hierarchy (Phase E) exists
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
     CONSTRAINT artifacts_content_check     CHECK (content_text IS NOT NULL OR content_bytes IS NOT NULL),
-    CONSTRAINT artifacts_entity_type_check CHECK (entity_type IN ('sbb','abb'))
+    CONSTRAINT artifacts_entity_type_check CHECK (entity_type IN ('sbb','abb','application'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_artifacts_entity  ON enterprise_repository.artifacts (entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_artifacts_hash    ON enterprise_repository.artifacts (content_hash);
 CREATE INDEX IF NOT EXISTS idx_artifacts_type    ON enterprise_repository.artifacts (artifact_type);
 CREATE INDEX IF NOT EXISTS idx_artifacts_created ON enterprise_repository.artifacts (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_artifacts_business_unit ON enterprise_repository.artifacts (business_unit);
 CREATE INDEX IF NOT EXISTS idx_artifacts_fts     ON enterprise_repository.artifacts
     USING GIN (to_tsvector('english', coalesce(entity_name,'') || ' ' || coalesce(content_text,'')));
 
@@ -67,7 +70,7 @@ CREATE TABLE IF NOT EXISTS enterprise_repository.standards (
 CREATE INDEX IF NOT EXISTS idx_standards_framework ON enterprise_repository.standards (framework);
 
 CREATE TABLE IF NOT EXISTS enterprise_repository.entity_standards (
-    entity_type     VARCHAR(10)     NOT NULL,
+    entity_type     VARCHAR(20)     NOT NULL,
     entity_id       INTEGER         NOT NULL,
     entity_name     VARCHAR(255)    NOT NULL,
     standard_id     INTEGER         NOT NULL REFERENCES enterprise_repository.standards(id) ON DELETE CASCADE,
@@ -79,7 +82,7 @@ CREATE TABLE IF NOT EXISTS enterprise_repository.entity_standards (
 
 CREATE TABLE IF NOT EXISTS enterprise_repository.compliance_assessments (
     id              SERIAL          PRIMARY KEY,
-    entity_type     VARCHAR(10)     NOT NULL,
+    entity_type     VARCHAR(20)     NOT NULL,
     entity_id       INTEGER         NOT NULL,
     entity_name     VARCHAR(255)    NOT NULL,
     criteria        TEXT            NOT NULL,
@@ -93,7 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_assessments_entity ON enterprise_repository.compl
 
 CREATE TABLE IF NOT EXISTS enterprise_repository.dispensations (
     id              SERIAL          PRIMARY KEY,
-    entity_type     VARCHAR(10)     NOT NULL,
+    entity_type     VARCHAR(20)     NOT NULL,
     entity_id       INTEGER         NOT NULL,
     entity_name     VARCHAR(255)    NOT NULL,
     standard_id     INTEGER         REFERENCES enterprise_repository.standards(id),
