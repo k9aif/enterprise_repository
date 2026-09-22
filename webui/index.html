@@ -4,7 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>K9X Enterprise Repository</title>
-  <link rel="stylesheet" href="/static/app.css">
+  <!-- ?v=N is a manual cache-buster, same convention as doit/index.html
+       (?v=25) -- bump N here on every real app.css/app.js change. A
+       version-bumped URL is treated as a brand-new resource by any cache
+       layer (browser or Cloudflare), so it doesn't wait on a revalidation
+       round-trip the way NoCacheStaticFiles' no-cache header does --
+       both together mean a real deploy is never invisible for hours
+       again (confirmed live 2026-09-22: exactly that happened once
+       already, Cloudflare serving a stale app.js under its own
+       max-age=14400 default). -->
+  <link rel="stylesheet" href="/static/app.css?v=1">
 </head>
 <body>
   <div class="layout" id="layout">
@@ -49,6 +58,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=1"></script>
 </body>
 </html>
