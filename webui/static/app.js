@@ -344,7 +344,18 @@ async function pageEntity(entityType, entityId) {
         ).join("")}</ul></div>`
       : "";
 
+    const entityBreadcrumbParts = [{ label: "Home", href: "#/" }];
+    if (data.business_unit) {
+      entityBreadcrumbParts.push({ label: "Organizational Units", href: "#/browse" });
+      entityBreadcrumbParts.push({
+        label: data.business_unit,
+        href: `#/browse/org/k9x/bu/${encodeURIComponent(data.business_unit)}`,
+      });
+    }
+    entityBreadcrumbParts.push({ label: title });
+
     app.innerHTML = `
+      ${breadcrumb(entityBreadcrumbParts)}
       <div class="article-title">${esc(title)}</div>
       <div class="article-body">
         <div class="article-main">
