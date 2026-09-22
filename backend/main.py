@@ -23,6 +23,27 @@ _WEBUI  = _ROOT / "webui"
 _STATIC = _WEBUI / "static"
 _INDEX  = _WEBUI / "index.html"
 
+
+class NoCacheStaticFiles(StaticFiles):
+    """StaticFiles that always sends an explicit Cache-Control header.
+
+    Without this, Cloudflare's own default Browser Cache TTL (commonly
+    4h for .js/.css) silently takes over, so a rebuilt app.js can sit
+    invisible behind the CDN for hours after a real deploy -- confirmed
+    live 2026-09-22 on repo.k9x.ai: a real rebuild (verified present via
+    a cache-busted request straight to the origin) was still invisible
+    to a normal browser load, cf-cache-status: HIT, age: 2597s. Same bug
+    class k9x-hil already hit and fixed this same way; ported here rather
+    than rediscovered from scratch next time. no-cache (not no-store)
+    still lets ETag-based conditional GETs return a cheap 304.
+    """
+
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 app = FastAPI(title="k9x Enterprise Repository", version="0.1.0")
 
 app.include_router(artifacts_router)
@@ -32,7 +53,7 @@ app.include_router(entities_router)
 app.include_router(search_router)
 
 if _STATIC.exists():
-    app.mount("/static", StaticFiles(directory=str(_STATIC)), name="static")
+    app.mount("/static", NoCacheStaticFiles(directory=str(_STATIC)), name="static")
 
 
 @app.on_event("startup")
