@@ -439,6 +439,7 @@ function route() {
 
   const isLanding = segments.length === 0;
   document.getElementById("layout").classList.toggle("landing", isLanding);
+  window.scrollTo(0, 0);                     // every page opens at its top, also after Back/Forward
 
   if (segments.length === 0) return pageHome();
   if (segments[0] === "search") return pageSearch(params);

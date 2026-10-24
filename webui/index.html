@@ -13,7 +13,7 @@
        again (confirmed live 2026-09-22: exactly that happened once
        already, Cloudflare serving a stale app.js under its own
        max-age=14400 default). -->
-  <link rel="stylesheet" href="/static/app.css?v=2">
+  <link rel="stylesheet" href="/static/app.css?v=3">
 </head>
 <body>
 <script>/* dark before first paint, so the page never flashes white (initTheme in app.js keeps it in step) */
@@ -37,13 +37,14 @@ try { if (localStorage.getItem("k9repo_dark") !== "0") document.body.classList.a
       <header class="header">
         <div class="header-brand">
           <a class="header-logo" href="https://k9x.ai" target="_blank" rel="noopener">K9X</a>
-          <div class="header-sub">Enterprise Repository <span class="beta-badge">Beta</span></div>
+          <a class="header-sub" href="#/" title="Repository home" style="text-decoration:none;color:inherit">Enterprise Repository <span class="beta-badge">Beta</span></a>
         </div>
         <form class="site-search" id="site-search">
           <input type="text" id="q" placeholder="Search artifacts, standards, patterns…" autocomplete="off">
           <button type="submit">Search</button>
         </form>
         <div class="header-actions">
+          <a href="#/" class="btn btn-ghost" title="Repository home" style="padding:6px 12px;font-size:12px">⌂ Home</a>
           <a id="continuum-link" class="btn btn-ghost" href="#" target="_blank" style="padding:6px 12px;font-size:12px">Open Continuum ↗</a>
           <button id="theme-btn" class="theme-toggle" title="Toggle theme">🌙</button>
         </div>
@@ -60,6 +61,6 @@ try { if (localStorage.getItem("k9repo_dark") !== "0") document.body.classList.a
     </div>
   </div>
 
-  <script src="/static/app.js?v=2"></script>
+  <script src="/static/app.js?v=3"></script>
 </body>
 </html>
