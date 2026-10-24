@@ -13,9 +13,11 @@
        again (confirmed live 2026-09-22: exactly that happened once
        already, Cloudflare serving a stale app.js under its own
        max-age=14400 default). -->
-  <link rel="stylesheet" href="/static/app.css?v=1">
+  <link rel="stylesheet" href="/static/app.css?v=2">
 </head>
 <body>
+<script>/* dark before first paint, so the page never flashes white (initTheme in app.js keeps it in step) */
+try { if (localStorage.getItem("k9repo_dark") !== "0") document.body.classList.add("dark"); } catch (e) { document.body.classList.add("dark"); }</script>
   <div class="layout" id="layout">
     <aside class="sidebar">
       <div style="font-size:13px;font-weight:700;color:var(--text-header);margin-bottom:2px">
@@ -58,6 +60,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=1"></script>
+  <script src="/static/app.js?v=2"></script>
 </body>
 </html>
